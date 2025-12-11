@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Define constants
-PLATFORMS="linux/arm/v7,linux/arm64/v8,linux/amd64"
+PLATFORMS="linux/amd64"
 
 function parse_args {
     echo "STEP: Parse arguments"
@@ -84,8 +84,9 @@ function build_and_push_image {
     cd .. || exit 1
     # shellcheck disable=SC2086
     docker buildx build . $build_args \
-        --push \
         --platform $PLATFORMS \
+        --provenance=false \
+        --push \
         -f "$dockerfile" \
         $tags
     

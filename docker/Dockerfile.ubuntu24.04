@@ -1,0 +1,57 @@
+FROM docker.io/library/kellnrdevcontainer:latest AS devcontainer
+
+RUN git clone https://github.com/sfb103/kellnr.git /tmp/kellnr && \
+    cd /tmp/kellnr && git checkout s3-via-serviceacct && \
+    cargo build --release
+
+##################
+# Runtime image  #
+##################
+
+FROM ubuntu:24.04
+
+ARG ADMINPWD=admin
+ENV INSTALLDIR=/opt
+ENV DATADIR=/opt/kdata
+ARG AUTHTOKEN=Zy9HhJ02RJmg0GCrgLfaCVfU6IwDfhXD
+ARG VERSION
+
+WORKDIR ${INSTALLDIR}
+
+USER root
+
+ENV RUSTUP_HOME="/usr/local/rustup"
+ENV CARGO_HOME="/usr/local/cargo"
+ENV PATH="/usr/local/cargo/bin:${PATH}"
+RUN echo && echo 'Update apt cache' && \
+    apt-get update && apt-get upgrade -y && \
+    \
+    echo && echo "Installing dependencies" && \
+    apt-get install -y curl sed git zip apt-utils build-essential llvm-dev \
+                       libclang-dev clang cmake pkg-config libssl-dev \
+                       ca-certificates && \
+    \
+    echo && echo 'Clean up apt' && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/archives/*deb && \
+    rm -rf /tmp/* && \
+    \
+    echo && echo "Installing Rust support" && \
+    curl --proto '=https' --tlsv1.3 -sSfL https://sh.rustup.rs | sh -s -- -y && \
+    \
+    echo && echo "Installing kellnr v${VERSION}" && \
+    curl -s https://raw.githubusercontent.com/kellnr/installer/main/install.sh | bash -s -- -d ${DATADIR} -p ${ADMINPWD} -t ${AUTHTOKEN} -v ${VERSION} && \
+    rm *.zip && \
+    rustup component add rust-src
+
+COPY --from=devcontainer /tmp/kellnr/target/release/kellnr ${INSTALLDIR}/kellnr/kellnr
+COPY --from=devcontainer /tmp/kellnr/config/default.toml ${INSTALLDIR}/kellnr/config/default.toml
+
+HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+EXPOSE 8000
+
+WORKDIR ${INSTALLDIR}/kellnr
+ENTRYPOINT ["/bin/sh", "-c" , "update-ca-certificates && ./kellnr"]
