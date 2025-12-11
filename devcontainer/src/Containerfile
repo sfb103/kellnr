@@ -17,7 +17,7 @@ RUN echo && echo 'Update apt cache' && \
     apt-get install -y git git-lfs vim vim-tiny net-tools iputils-ping dnsutils bash-completion nano tree curl \
                        unzip apt-transport-https ca-certificates gnupg libtool autoconf automake pkg-config gcc \
                        cmake ninja-build autogen libgtest-dev libboost-all-dev build-essential libapr1-dev \
-                       libaprutil1-dev libssl-dev openssl xz-utils just lua5.4 liblua5.4-dev luarocks && \
+                       libaprutil1-dev libssl-dev openssl xz-utils just && \
     \
     echo && echo "Installing docker" && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
@@ -43,11 +43,7 @@ RUN echo && echo 'Update apt cache' && \
     rustup install stable && \
     cargo install cargo2junit && \
     cargo install --locked cargo-nextest && \
-    chmod -R a+rw /.cargo /.rustup && \
-    \
-    echo && echo "Installing Lua support" && \
-    luarocks config lua_version 5.4 && \
-    luarocks install luasocket lua-http 
+    chmod -R a+rw /.cargo /.rustup
 
 USER ubuntu
 
@@ -57,7 +53,7 @@ RUN echo && \
     for pkg in git git-lfs vim vim-tiny net-tools iputils-ping dnsutils bash-completion nano tree curl \
                unzip apt-transport-https ca-certificates gnupg libtool autoconf automake pkg-config gcc \
                cmake ninja-build autogen libtool libgtest-dev libboost-all-dev build-essential libapr1-dev \
-               libaprutil1-dev libssl-dev openssl xz-utils just lua5.4 liblua5.4-dev luarocks \
+               libaprutil1-dev libssl-dev openssl xz-utils just \
                nodejs \
                docker-ce-cli docker-buildx-plugin docker-compose-plugin \
                ; do \

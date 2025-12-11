@@ -35,5 +35,18 @@ if [ -f /tmp/home/.bashrc ]; then
    fi
 fi
 
-/bin/bash -c "tar -C /home/$ENV_USER -cf - . | tar -C /tmp/home -xvf -" > /dev/null
+/bin/bash -c "tar -C /home/$ENV_USER -cf - . | tar -C /tmp/home -xf -" > /dev/null
+
+if [ -d /.rustup ]; then
+   mkdir -p /tmp/home/.rustup
+   /bin/bash -c "tar -C /.rustup -cf - . | tar -C /tmp/home/.rustup -xf -" > /dev/null
+   echo "export RUSTUP_HOME=/home/$ENV_USER/.rustup" >> /tmp/home/.bashrc
+fi
+if [ -d /.cargo ]; then
+   mkdir -p /tmp/home/.cargo
+   /bin/bash -c "tar -C /.cargo -cf - . | tar -C /tmp/home/.cargo -xf -" > /dev/null
+   echo "export CARGO_HOME=/home/$ENV_USER/.cargo" >> /tmp/home/.bashrc
+   echo "export PATH=$CARGO_HOME/.cargo/bin:$PATH" >> /tmp/home/.bashrc
+fi
+
 chown $ENV_UID:$ENV_GID -R /tmp/home
