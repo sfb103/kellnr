@@ -27,6 +27,7 @@ async fn main() {
     init_tracing(&settings);
 
     info!("Starting kellnr");
+    info!("Settings: {:?}", settings);
 
     // Ensure the data directory exists, if not create it
     create_dir_all(&settings.registry.data_dir)
