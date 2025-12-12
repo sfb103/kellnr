@@ -46,7 +46,7 @@ if [ -d /.cargo ]; then
    mkdir -p /tmp/home/.cargo
    /bin/bash -c "tar -C /.cargo -cf - . | tar -C /tmp/home/.cargo -xf -" > /dev/null
    echo "export CARGO_HOME=/home/$ENV_USER/.cargo" >> /tmp/home/.bashrc
-   echo "export PATH=$CARGO_HOME/.cargo/bin:$PATH" >> /tmp/home/.bashrc
+   echo "export PATH=/home/$ENV_USER/.cargo/bin:$PATH" >> /tmp/home/.bashrc
 fi
 
 chown $ENV_UID:$ENV_GID -R /tmp/home
